@@ -171,14 +171,12 @@ CREATE TABLE `data` (
 
 #### MySQL 环境变量
 
-```json
-{
-  host: DB_HOST,
-  port: DB_PORT,
-  user: DB_USER,
-  password: DB_PASSWD,
-  database: DB_NAME
-}
+```yml
+- DB_HOST
+- DB_PORT
+- DB_USER
+- DB_PASSWD
+- DB_NAME
 ```
 
 #### 切换用户配置保存模式
