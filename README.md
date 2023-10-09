@@ -38,6 +38,7 @@ API2D 配置示例
 ```yml
 - DEFAULT_API_URL=https://oa.api2d.net
 - DEFAULT_API_KEY=fk...
+- DEFAULT_MODEL=gpt-3.5-turbo
 ```
 
 4. 设置触发词
@@ -58,6 +59,7 @@ DEFAULT_API_WORD=
 LOCK_API_URL=true
 LOCK_API_KEY=true
 LOCK_API_WORD=true
+LOCK_MODEL=true
 ```
 
 6. 启动服务后（见后），记得将回调地址和Token回填到微信测试号设置页面。
@@ -76,6 +78,7 @@ docker run -d --name bot \
 -e DEFAULT_API_KEY=fk... \
 -e LOCK_API_URL=true \
 -e LOCK_API_KEY=true \
+-e LOCK_MODEL=true \
 -e DB_TYPE=json \
 -v ./data:/data \
 -p 80:9000 \
@@ -101,6 +104,7 @@ services:
       - DEFAULT_API_KEY=fk...
       - LOCK_API_URL=true
       - LOCK_API_KEY=true
+      - LOCK_MODEL=true
       - DB_TYPE=json
     volumes:
       - ./data:/data

@@ -12,7 +12,7 @@ import knex from 'knex';
 
 // 从 .env 文件中读取环境变量
 dotenv.config();
-const { MP_TOKEN, MP_APPID, MP_APPSECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_API, DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWD, DB_NAME, DB_TABLE, DEFAULT_API_URL, DEFAULT_API_KEY, DEFAULT_API_WORD, LOCK_API_URL, LOCK_API_KEY, LOCK_API_WORD } = process.env;
+const { MP_TOKEN, MP_APPID, MP_APPSECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_API, DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWD, DB_NAME, DB_TABLE, DEFAULT_API_URL, DEFAULT_API_KEY, DEFAULT_API_WORD, DEFAULT_MODEL, LOCK_API_URL, LOCK_API_KEY, LOCK_API_WORD, LOCK_MODEL } = process.env;
 
 let db;
 if (DB_TYPE === 'json') {
@@ -58,6 +58,7 @@ if (!LOCK_API_KEY) cmdDocs.push('🎈 /setKey=API_KEY - 设置OPENAI/API+/API2d 
 if (!LOCK_API_URL) cmdDocs.push('🎈 /setUrl=API_URL - 设置OPENAI/API+/API2d API入口，不包含 /v1/chat/...部分');
 if (!LOCK_API_WORD) cmdDocs.push('🎈 /setWord=API_WORD - 设置问答触发词');
 cmdDocs.push('🎈 /setSystem=SYSTEM_MESSAGE - 设置系统提示词');
+if (!LOCK_MODEL) cmdDocs.push('🎈 /setModel=MODEL_NAME - 设置模型名称');
 
 const helpDoc = cmdDocs.join('\n');
 
@@ -111,6 +112,14 @@ app.all('/wechat', xml_bodyparser(), checkSignature, async (req, res) => {
                     case 'setsystem':
                         await db.set(`API_SYSTEM_MESSAGE_${openid}`, value);
                         sendReply(res, makeMsg(fromusername[0], tousername[0], "API_SYSTEM_MESSAGE saved"));
+                        break;
+                    case 'setmodel':
+                        if (LOCK_MODEL) {
+                            sendReply(res, makeMsg(fromusername[0], tousername[0], 'Command setmodel locked'));
+                        } else {
+                            await db.set(`MODEL_${openid}`, value);
+                            sendReply(res, makeMsg(fromusername[0], tousername[0], "MODEL saved"));
+                        }
                         break;
                     default:
                         sendReply(res, makeMsg(fromusername[0], tousername[0], 'Unknown command'));
@@ -311,7 +320,7 @@ async function llmReply(apikey, url, content, openid, type = 'wechat') {
     const api2d = new Api2d(apikey, url);
     const messages = [{
         "role": "user",
-        "content": content,
+        "content": content
     }];
     const systemMessage = await db.get(`API_SYSTEM_MESSAGE_${openid}`);
     if (systemMessage) {
@@ -321,6 +330,7 @@ async function llmReply(apikey, url, content, openid, type = 'wechat') {
         });
     }
     const result = await api2d.completion({
+        model: db.get(`MODEL_${openid}`) || DEFAULT_MODEL,
         messages,
         stream,
         onMessage: async (chars, char) => {

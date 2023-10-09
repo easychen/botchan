@@ -11,6 +11,7 @@ services:
       - DEFAULT_API_KEY=fk...
       - LOCK_API_URL=true
       - LOCK_API_KEY=true
+      - LOCK_MODEL=true
       - DB_TYPE=json
     volumes:
       - ./data:/data
