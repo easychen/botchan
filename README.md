@@ -31,6 +31,7 @@ OpenAI 配置示例
 ```yml
 - DEFAULT_API_URL=https://api.openai.com
 - DEFAULT_API_KEY=sk...
+- DEFAULT_MODEL=gpt-3.5-turbo
 ```
 
 API2D 配置示例
