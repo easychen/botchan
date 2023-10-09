@@ -69,13 +69,15 @@ LOCK_MODEL=true
 
 > 请按上文介绍修改环境变量
 
+> 确保对 `./data` 有写权限，或者挂到有权限的地方去
+
 ```bash
 docker run -d --name bot \
 -e MP_APPID= \
 -e MP_APPSECRET= \
 -e MP_TOKEN= \
--e DEFAULT_API_URL=https://oa.ai01.org \
--e DEFAULT_API_WORD=方糖 \  
+-e DEFAULT_API_URL=https://oa.api2d.net \
+-e DEFAULT_API_WORD= \  
 -e DEFAULT_API_KEY=fk... \
 -e LOCK_API_URL=true \
 -e LOCK_API_KEY=true \
@@ -89,6 +91,8 @@ easychen/botchan:latest
 
 > 请按上文介绍修改环境变量
 
+> 确保对 `./data` 有写权限，或者挂到有权限的地方去
+
 复制 `docker-compose.example.yml` 为 `docker-compose.yml`，并根据需要修改环境变量：
 
 ```yml
@@ -100,8 +104,8 @@ services:
       - MP_APPID=
       - MP_APPSECRET=
       - MP_TOKEN=
-      - DEFAULT_API_URL=https://oa.ai01.org
-      - DEFAULT_API_WORD=方糖
+      - DEFAULT_API_URL=https://oa.api2d.net
+      - DEFAULT_API_WORD=
       - DEFAULT_API_KEY=fk...
       - LOCK_API_URL=true
       - LOCK_API_KEY=true

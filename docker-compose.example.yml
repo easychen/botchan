@@ -6,8 +6,8 @@ services:
       - MP_APPID=
       - MP_APPSECRET=
       - MP_TOKEN=
-      - DEFAULT_API_URL=https://oa.ai01.org
-      - DEFAULT_API_WORD=方糖
+      - DEFAULT_API_URL=https://oa.api2d.net
+      - DEFAULT_API_WORD=
       - DEFAULT_API_KEY=fk...
       - LOCK_API_URL=true
       - LOCK_API_KEY=true
@@ -16,4 +16,4 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - 9000:9000
+      - 80:9000
