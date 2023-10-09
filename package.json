@@ -2,18 +2,19 @@
   "name": "botchan",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/easychen/botchan.git",
+  "repository": "https://gitlab.com/easychen/botchan.git",
   "author": "Easy <easychen@qq.com>",
   "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
     "docker-run": "docker run --rm -it -p 9000:9000 --name botchan botchan",
-    "docker-build": "docker build -t botchan .",
-    "docker-push": "docker tag botchan easychen/botchan:latest && docker push easychen/botchan:latest && TAG=$(date +%Y%m%d%H%M%S) && docker tag botchan easychen/botchan:$TAG && docker push easychen/botchan:$TAG && echo Pushed tag: $TAG"
+    "docker-build": "docker buildx build --platform linux/amd64,linux/arm64 -t botchan .",
+    "docker-push": "docker tag botchan easychen/botchan:latest && docker push easychen/botchan:latest && TAG=$(date +%Y%m%d%H%M%S) && docker tag botchan easychen/botchan:$TAG && docker push easychen/botchan:$TAG && echo Pushed tag: $TAG",
+    "docker-build-push": "docker buildx create --use --name xbd && TAG=$(date +%Y%m%d%H%M%S) && docker buildx build -t easychen/botchan:latest -t easychen/botchan:$TAG --platform=linux/amd64,linux/arm64,linux/arm/v7 --push . && docker buildx rm xbd && echo Pushed tag: $TAG"
   },
   "dependencies": {
-    "api2d": "^0.1.36",
+    "api2d": "^0.1.37",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "cross-fetch": "^4.0.0",
@@ -24,7 +25,8 @@
     "mysql2": "^3.6.1",
     "simple-json-db": "^2.0.0"
   },
-  "license": "GPL-3.0",
+  "license": "UNLICENSED",
+  "private": true,
   "devDependencies": {
     "nodemon": "^3.0.1"
   }
