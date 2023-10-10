@@ -12,7 +12,14 @@ import knex from 'knex';
 
 // 从 .env 文件中读取环境变量
 dotenv.config();
-const { MP_TOKEN, MP_APPID, MP_APPSECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_API, DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWD, DB_NAME, DB_TABLE, DEFAULT_API_URL, DEFAULT_API_KEY, DEFAULT_API_WORD, DEFAULT_MODEL, LOCK_API_URL, LOCK_API_KEY, LOCK_API_WORD, LOCK_MODEL } = process.env;
+const { 
+        MP_TOKEN,MP_APPID, MP_APPSECRET, 
+        TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_API, 
+        DB_TYPE, DB_HOST, DB_PORT, DB_USER, DB_PASSWD, DB_NAME, DB_TABLE, 
+        DEFAULT_API_URL, DEFAULT_API_KEY, DEFAULT_API_WORD, DEFAULT_MODEL, 
+        LOCK_API_URL, LOCK_API_KEY, LOCK_API_WORD, LOCK_MODEL,
+        MAX_TOKEN, TEMPERATURE, TIMEOUT, STREAM, REPLY_CHUNK_LENGHT 
+    } = process.env;
 
 let db;
 if (DB_TYPE === 'json') {
@@ -316,8 +323,9 @@ async function llmReply(apikey, url, content, openid, type = 'wechat') {
     else sendTypingTg(openid);
 
     // let lastContent = '';
-    const stream = false;
-    const api2d = new Api2d(apikey, url);
+    const stream = String(STREAM).toLowerCase() === 'true';
+    let buffer = '';
+    const api2d = new Api2d(apikey, url, (TIMEOUT||180)*1000 );
     const messages = [{
         "role": "user",
         "content": content
@@ -329,30 +337,56 @@ async function llmReply(apikey, url, content, openid, type = 'wechat') {
             "content": systemMessage
         });
     }
-    const result = await api2d.completion({
+    const payload = {
         model: db.get(`MODEL_${openid}`) || DEFAULT_MODEL,
         messages,
         stream,
         onMessage: async (chars, char) => {
-            // console.log(chars.length, lastContent.length);
-            // if( chars.length < lastContent.length )
-            // {
-            //     // 发送内容
-            //     await sendMessage(openid, chars);
-            // }
-            // lastContent = chars;
+            // 流模式下，每返回 REPLY_CHUNK_LENGHT 个字符，就发送一次
+            buffer = buffer + char;
+            if (buffer.length > REPLY_CHUNK_LENGHT) {
+                const retContent = buffer+'…';
+                buffer = '';
+                if (type == 'wechat')
+                    await sendMessage(openid, retContent);
+                else
+                    await tgReply(openid, retContent);
+            }
         }
-    })
+    };
+    if (MAX_TOKEN) payload.max_tokens = parseInt(MAX_TOKEN);
+    if (TEMPERATURE) payload.temperature = parseFloat(TEMPERATURE);
+
+    console.log("ai payload", payload);
+
+    const result = await api2d.completion(payload)
     // 非流式下，直接发送
     if (!stream) {
         console.log("ai ret", result);
         const retContent = result.error ? JSON.parse(result.error).error.message : result.choices[0].message.content;
-        if (type == 'wechat')
-            await sendMessage(openid, retContent);
-        else
-            await tgReply(openid, retContent);
-    }
+        // 如果 retContent 长度超过 REPLY_CHUNK_LENGHT ，则分段发送
+        const chunks = splitString(retContent, parseInt(REPLY_CHUNK_LENGHT)||1000);
+        console.log("chunks", chunks);
 
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            if (type == 'wechat')
+                await sendMessage(openid, chunk);
+            else
+                await tgReply(openid, chunk);
+        }
+    }else
+    {
+        // 如果 buffer 里还有内容，发送
+        buffer += '◾️';
+        if (buffer.length > 0) {
+            if (type == 'wechat')
+                await sendMessage(openid, buffer);
+            else
+                await tgReply(openid, buffer);
+        }
+        
+    }
 
     return result;
 }
@@ -509,5 +543,13 @@ function tg_escape_v2(string) {
 
     return string.replace(specialCharacters, escapedCharacters);
 };
+
+function splitString(str, length) {
+    let result = [];
+    for (var i = 0; i < str.length; i += length) {
+      result.push(str.substring(i, i + length));
+    }
+    return result;
+  }
 
 

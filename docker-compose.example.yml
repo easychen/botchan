@@ -13,6 +13,8 @@ services:
       - LOCK_API_KEY=true
       - LOCK_MODEL=true
       - DB_TYPE=json
+      - STREAM=true
+      - REPLY_CHUNK_LENGHT=1000
     volumes:
       - ./data:/data
     ports:
