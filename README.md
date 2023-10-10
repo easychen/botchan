@@ -155,6 +155,16 @@ docker-compose up -d
 - STREAM=true #是否采用流式传输 
 ```
 
+### AZURE 支持
+
+Bot酱兼容 Azure 接口，将 DEFAULT_API_URL 指定为 Azure Endpoint（ https://xxx.openai.azure.com ） 即可。
+
+Azure 的 Deployment 需要和 azure 的 model name 保持一致。
+
+![](images/20231010183939.png)
+
+在通过命令或者配置文件指定模型时，请使用 OpenAI 官方的名称，如 `gpt-3.5-turbo`。
+
 ### 截断设置
 
 过长文字可能导致内容无法返回，会截断为多条。
